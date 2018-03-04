@@ -1,0 +1,16 @@
+// Input a number and get the switch statement return
+
+let v : int = exec(0)
+
+function exec (x : int) : int{
+    let x : int = 0
+    input x
+    
+    switch a {
+        case 1 : output 2
+        case 2 : output 3
+        case 3 : output 4
+        default : output 5
+    }
+    return x
+}
