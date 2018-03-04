@@ -183,7 +183,7 @@ type stmt =
   (* TODO *)
   | Switch of exp * stmt * stmt 
   | Case of exp * stmt
-  | Default of exp * stmt
+  | Default of stmt
 
 (* Pretty-print a statement *)
 let rec pp_stmt (fmt : F.formatter) (stmt : stmt) : unit =
