@@ -57,7 +57,7 @@ type stmt =
   | Loc of stmt * int (* annotate a statement with it's source line number *)
   | Switch of exp * stmt * stmt
   | Case of exp * stmt
-  | Default of exp * stmt
+  | Default of stmt
 
 type typ =
   | Int

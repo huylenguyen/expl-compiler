@@ -229,12 +229,7 @@ let rec type_stmt (ln : int option) (env :env_t) (return : t) (stmt : stmt)
     | (_, e') -> 
       let stmt' = type_stmt ln env return stmt in 
       Case (e', stmt'))
-  | Default (e, stmt) ->
-    (match type_exp ln env e with 
-    | (Tarray _, _) -> type_error ln "default statement with expression of type array"
-    | (_, e') -> 
-      let stmt' = type_stmt ln env return stmt in 
-      Default (e', stmt'))
+  | Default (stmt) -> Default (type_stmt ln env return stmt)
 
 let source_typ_to_t (t : SourceAst.typ) : t =
   match t with
@@ -315,7 +310,7 @@ let rec check_return_paths (stmts : stmt list) : bool =
         check_return_paths [def_stmt]
       | Case (_, stmt) ->
         check_return_paths [stmt]
-      | Default (_, stmt) ->
+      | Default (stmt) ->
         check_return_paths [stmt]
 
 (* Check a function. Return a scope-annotated version is there are no errors. *)
