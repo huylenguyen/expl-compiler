@@ -232,6 +232,19 @@ let rec pp_stmt (fmt : F.formatter) (stmt : stmt) : unit =
   | Loc (s, _) ->
     pp_stmt fmt s
   (* TODO pretty print switch *)
+  | Case (exp, stmt) ->
+    F.fprintf fmt "@[<2>case@ %a@ :@ %a@]"
+    pp_exp exp
+    pp_stmt stmt
+  | Default (stmt) ->
+    F.fprintf fmt "@[<2>default :@ %a@]"
+    pp_stmt stmt
+  | Switch (exp, stmts, stmt) ->
+    F.fprintf fmt "@[<2>switch@ %a@ :@ %a@ %a@]"
+    pp_exp exp
+    pp_stmt stmts
+    pp_stmt stmt
+
 
 and pp_stmts (fmt : F.formatter) (stmts : stmt list) : unit =
   let rec pp fmt stmts =
