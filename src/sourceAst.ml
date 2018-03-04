@@ -455,10 +455,8 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
   | (T.Input, ln) :: (T.Ident x, _) :: toks -> (Loc (In (Source (x,None)), ln), toks)
   | (T.Output, ln) :: (T.Ident x, _) :: toks -> (Loc (Out (Source (x,None)), ln), toks)
   | (T.Return, ln) :: (T.Ident x, _) :: toks -> (Loc (Return (Some (Source (x,None))), ln), toks)
-  | (t, ln) :: _ ->
-    parse_error ln ("bad statement, beginning with a " ^ T.show_token t)
   (* TODO Parsing of Switch *)
-(*   | (T.Switch, ln) :: toks ->
+  | (T.Switch, ln) :: toks ->
     (match parse_stmt toks with 
       | (_, []) -> eof_error "a switch statement"
       | (s, (T.Case, _)::toks) ->
@@ -466,7 +464,9 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
           (Loc (Switch (e, Stmts [], s), ln), toks)
       | (_, (t, ln) :: _) ->
         parse_error_expect ln t T.Case "a case statement")
- *)
+  | (t, ln) :: _ ->
+    parse_error ln ("bad statement, beginning with a " ^ T.show_token t)
+
 (* Convert all of the statement in toks into an AST, stopping on a }. Return
    them with the left over tokens, not including the } *)
 and parse_stmt_list (toks : T.tok_loc list) : stmt list * T.tok_loc list =
