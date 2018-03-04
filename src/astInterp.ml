@@ -266,14 +266,14 @@ and interp_stmt (env : env_t) (s : stmt) : unit =
     raise (Return_exn !(Idmap.find i env.vars))
   | Loc (s, _) -> interp_stmt env s
   (* TODO *)
-  | Switch (exp, stmts , def_stmt) -> 
+  | Switch (exp, stmts, def_stmt) -> 
     let e = interp_exp env exp in 
       match stmts with 
       | Stmts (s::rest) -> 
         let (ex, st) = interp_case s env in 
         if e = ex then st else interp_stmt env (Switch (exp, rest, def_stmt))
       | _ -> interp_stmt env def_stmt
-  | Case (stmt) -> interp_case stmt env
+  | Case (exp, stmt) -> (interp_exp env exp, interp_stmt env stmt)
   | Default (stmt) -> interp_stmt env stmt
 
 and interp_case (s: statement) (env: env_t) =
