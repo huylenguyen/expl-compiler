@@ -220,19 +220,21 @@ let rec type_stmt (ln : int option) (env :env_t) (return : t) (stmt : stmt)
   | Switch (e, stmt_list, def_stmt) -> 
     let stmt_list' = (type_stmt ln env return) stmt_list  in
       let def_stmt' = type_stmt ln env return def_stmt in 
-        match type_exp ln env e with 
-        | (Tarray _, e') -> type_error ln "switch statement with expression of type array"
-        | _ -> Switch (e, stmt_list', def_stmt') 
-  | Case (e, stmt) -> 
-    let stmt' = type_stmt ln env return stmt in
-      match type_exp ln env e with 
-      | (Tarray _, e') -> "case statement with expression of type array"
-      | _ -> Case (e', stmt')
-  | Default (e, stmt) -> 
-    let stmt' = type_stmt ln env return stmt in
-      match type_exp ln env e with 
-      | (Tarray _, e') -> "case statement with expression of type array"
-      | _ -> Default (e', stmt')
+        (match type_exp ln env e with 
+        | (Tarray _, _) -> type_error ln "switch statement with expression of type array"
+        | (_, e') -> Switch (e', stmt_list', def_stmt'))
+  | Case (e, stmt) ->
+    (match type_exp ln env e with 
+    | (Tarray _, _) -> type_error ln "case statement with expression of type array"
+    | (_, e') -> 
+      let stmt' = type_stmt ln env return stmt in 
+      Case (e', stmt'))
+  | Default (e, stmt) ->
+    (match type_exp ln env e with 
+    | (Tarray _, _) -> type_error ln "default statement with expression of type array"
+    | (_, e') -> 
+      let stmt' = type_stmt ln env return stmt in 
+      Default (e', stmt'))
 
 let source_typ_to_t (t : SourceAst.typ) : t =
   match t with
@@ -311,6 +313,10 @@ let rec check_return_paths (stmts : stmt list) : bool =
     (* TODO this should also check return paths of stmt_list *)
       | Switch (_, _, def_stmt) ->
         check_return_paths [def_stmt]
+      | Case (_, stmt) ->
+        check_return_paths [stmt]
+      | Default (_, stmt) ->
+        check_return_paths [stmt]
 
 (* Check a function. Return a scope-annotated version is there are no errors. *)
 let type_function (env : env_t) (f : func) : func =
