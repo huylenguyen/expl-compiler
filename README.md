@@ -6,6 +6,7 @@
 
 - tests/switch.expl (testing file)
 - tests/Makefile (to allow for testing file)
+- tests/switch_err.expl (Shows the various errors which have been implemented for the switch statement)
 - src/astInterp.ml
     - L268-281 Adds the interpreter functions for the switch, case and default statements
 - src/sourceAst.ml
