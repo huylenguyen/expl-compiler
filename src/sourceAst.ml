@@ -472,7 +472,6 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
         (Loc (Switch (e, s1, s2), ln), toks)
       | (_, (t, ln) :: _) ->
         parse_error_expect ln t T.Default "a switch statement")
-
   (* TODO Parsing of Case *)
   | (T.Case, ln) :: toks ->
     let (e, toks) = parse_exp toks in 
@@ -489,7 +488,6 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
   | (T.Input, ln) :: (T.Ident x, _) :: toks -> (Loc (In (Source (x,None)), ln), toks)
   | (T.Output, ln) :: (T.Ident x, _) :: toks -> (Loc (Out (Source (x,None)), ln), toks)
   | (T.Return, ln) :: (T.Ident x, _) :: toks -> (Loc (Return (Some (Source (x,None))), ln), toks)
-
   | (t, ln) :: _ ->
     parse_error ln ("bad statement, beginning with a " ^ T.show_token t)
 
