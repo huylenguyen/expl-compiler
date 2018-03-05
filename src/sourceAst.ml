@@ -181,7 +181,7 @@ type stmt =
   | Return of id option
   | Loc of stmt * int (* annotate a statement with it's source line number *)
   (* TODO *)
-  | Switch of exp * stmt * stmt
+  | Switch of exp * stmt
   | Case of exp * stmt
   | Default of stmt
 
@@ -239,11 +239,11 @@ let rec pp_stmt (fmt : F.formatter) (stmt : stmt) : unit =
   | Default (stmt) ->
     F.fprintf fmt "@[<2>default :@ %a@]"
     pp_stmt stmt
-  | Switch (exp, stmts, stmt) ->
-    F.fprintf fmt "@[<2>switch@ %a@ :@ %a@ %a@]"
+  (* TODO *)
+  | Switch (exp, stmts) ->
+    F.fprintf fmt "@[<2>switch@ %a@ :@ %a@]"
     pp_exp exp
     pp_stmt stmts
-    pp_stmt stmt
 
 
 and pp_stmts (fmt : F.formatter) (stmts : stmt list) : unit =
@@ -465,18 +465,20 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
   (* TODO Parsing of Switch *)
   | (T.Switch, ln) :: toks ->
     let (e, toks) = parse_exp toks in 
-    (match parse_stmt toks with  
-      | (_, []) -> eof_error "a switch statement"
-      | (s1, (T.Default, _) :: toks) -> 
-        let (s2, toks) = parse_stmt toks in 
-        (Loc (Switch (e, s1, s2), ln), toks)
-      | (_, (t, ln) :: _) ->
-        parse_error_expect ln t T.Default "a switch statement")
+    let (s, toks) = parse_stmt toks in 
+    (Loc (Switch (e, s), ln), toks)
   (* TODO Parsing of Case *)
   | (T.Case, ln) :: toks ->
     let (e, toks) = parse_exp toks in 
     let (s, toks) = parse_stmt toks in 
-    (Loc (Case (e, s), ln), toks)
+    (match toks with 
+      | [] -> eof_error "a case statement"
+      | (T.Case, ln) :: _ ->  
+        (Loc (Case (e, s), ln), toks)
+      | (T.Default, ln) :: _ -> 
+        (Loc (Case (e, s), ln), toks)
+      | (t, ln) :: _ ->
+          parse_error_expect ln t T.Default "a case statement")
   (* TODO Parsing of Default *)
   | (T.Default, ln) :: toks ->
     let (stmt, toks) = parse_stmt toks in 

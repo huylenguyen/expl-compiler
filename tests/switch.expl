@@ -24,8 +24,9 @@ function exec (x : int) : int{
         	z := c * 2
         	output z
         }
-    } default {
-        output x
+        default {
+        	output x
+    	}
     }
     return x
 }

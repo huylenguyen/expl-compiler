@@ -268,7 +268,7 @@ and interp_stmt (env : env_t) (s : stmt) : unit =
   (* TODO *)
   | Case (_, stmt) -> interp_stmt env stmt
   | Default (stmt) -> interp_stmt env stmt
-  | Switch (exp, stmts, stmt) -> 
+  | Switch (exp, stmts) -> 
     let e = interp_exp env exp in 
       (match stmts with 
       | Stmts (first::rest) ->
@@ -276,9 +276,9 @@ and interp_stmt (env : env_t) (s : stmt) : unit =
         | Case (ex, st) -> 
           let ex' = interp_exp env ex in
           let r = Stmts (rest) in 
-          if e = ex' then interp_stmt env st else interp_stmt env (Switch (exp, r, stmt)) (* () *)
-        | _ -> ())
-      | _ -> interp_stmt env stmt)
+          if e = ex' then interp_stmt env st else interp_stmt env (Switch (exp, r)) (* () *)
+        | Default (stmt) -> interp_stmt env stmt)
+      | _ -> ())
 
 let interp_prog (p : prog) : unit =
   let fun_env =
