@@ -217,18 +217,13 @@ let rec type_stmt (ln : int option) (env :env_t) (return : t) (stmt : stmt)
   | Loc (s, ln') ->
       type_stmt (Some ln') env return s
   (* TODO type check switch def case*)
-  | Switch (e, stmt_list) -> 
-    let stmt_list' = (type_stmt ln env return) stmt_list  in
+  | Switch (e, stmt_list, stmt) -> 
+    let stmt_list' = (type_stmt ln env return) stmt_list in
+    let stmt' = type_stmt ln env return stmt in
       (match type_exp ln env e with 
+        (* Switch statements cannot take an array in an expression, but this cannot happen anyway because the parser does not allow it, so this needs to do something more useful... *)
        | (Tarray _, _) -> type_error ln "switch statement with expression of type array"
-       | (_, e') -> Switch (e', stmt_list'))
-
-(*   | Switch (e, stmt_list, def_stmt) -> 
-    let stmt_list' = (type_stmt ln env return) stmt_list  in
-      let def_stmt' = type_stmt ln env return def_stmt in 
-        (match type_exp ln env e with 
-        | (Tarray _, _) -> type_error ln "switch statement with expression of type array"
-        | (_, e') -> Switch (e', stmt_list', def_stmt')) *)
+       | (_, e') -> Switch (e', stmt_list', stmt'))
   | Case (e, stmt) ->
     (match type_exp ln env e with 
     | (Tarray _, _) -> type_error ln "case statement with expression of type array"
@@ -311,8 +306,9 @@ let rec check_return_paths (stmts : stmt list) : bool =
       | DoWhile (s1, _, _) ->
         check_return_paths [s1]
       | Stmts s -> check_return_paths s
-    (* TODO this should also check return paths of stmt_list *)
-      | Switch (_, stmt) ->
+    (* TODO check return paths for switch statements *)
+      | Switch (_, _, stmt) ->
+        (* check_return_paths [stmts]; *)
         check_return_paths [stmt]
       | Case (_, stmt) ->
         check_return_paths [stmt]
