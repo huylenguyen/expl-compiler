@@ -265,7 +265,7 @@ and interp_stmt (env : env_t) (s : stmt) : unit =
   | Return (Some i) ->
     raise (Return_exn !(Idmap.find i env.vars))
   | Loc (s, _) -> interp_stmt env s
-  (* TODO *)
+  (* Adding in switch statements to the main interpreter *)
   | Case (_, stmt) -> interp_stmt env stmt
   | Default (stmt) -> interp_stmt env stmt
   | Switch (exp, stmts) -> 

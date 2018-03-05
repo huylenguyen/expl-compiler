@@ -64,7 +64,7 @@ type token =
   | Let
   | Function
   | Return
-  (* TODO *)
+  (* Implementing the Switch tokens *)
   | Switch
   | Case
   | Default
