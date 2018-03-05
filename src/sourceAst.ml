@@ -181,7 +181,7 @@ type stmt =
   | Return of id option
   | Loc of stmt * int (* annotate a statement with it's source line number *)
   (* TODO *)
-  | Switch of exp * stmt * stmt 
+  | Switch of exp * stmt
   | Case of exp * stmt
   | Default of stmt
 
@@ -239,11 +239,10 @@ let rec pp_stmt (fmt : F.formatter) (stmt : stmt) : unit =
   | Default (stmt) ->
     F.fprintf fmt "@[<2>default :@ %a@]"
     pp_stmt stmt
-  | Switch (exp, stmts, stmt) ->
-    F.fprintf fmt "@[<2>switch@ %a@ :@ %a@ %a@]"
+  | Switch (exp, stmts) ->
+    F.fprintf fmt "@[<2>switch@ %a@ :@ %a@]"
     pp_exp exp
     pp_stmt stmts
-    pp_stmt stmt
 
 
 and pp_stmts (fmt : F.formatter) (stmts : stmt list) : unit =
@@ -347,24 +346,31 @@ let eof_error (expect : string) : 'a =
 let rec parse_atomic_exp (toks : T.tok_loc list) : exp * T.tok_loc list =
   match toks with
   | [] -> eof_error "an expression"
+  (* Function detected *)
   | (T.Ident i, ln) :: (T.Lparen, _) ::toks ->
     let (args, toks) = parse_args ln toks in
     (Call (Source (i,None), args), toks)
+  (* Identifier detected *)
   | (T.Ident i, _) :: toks ->
     let (indices, toks) = parse_indices toks in
     (Ident (Source (i,None), indices), toks)
+  (* Numbers and bools detected *)
   | (T.Num n, _) :: toks -> (Num n, toks)
   | (T.True, _) :: toks -> (Bool true, toks)
   | (T.False, _) :: toks -> (Bool false, toks)
+  (* Operators detected *)
   | (T.Op T.Minus, _) :: toks ->
     let (e, toks) = parse_atomic_exp toks in
     (Op (Num 0L, T.Minus, e), toks)
+  (* Unary operators detected *)
   | (T.Uop uop, _) :: toks ->
     let (e, toks) = parse_atomic_exp toks in
     (Uop (uop, e), toks)
+  (* Array detected *)
   | (T.Array, _) :: toks ->
     let (indices, toks) = parse_indices toks in
-    (Array indices, toks)
+  (Array indices, toks)
+  (* Parenthesized expression detected *)
   | (T.Lparen, _) :: toks ->
     (match parse_exp toks with
      | (_, []) -> eof_error "a parenthesized expression"
@@ -372,6 +378,7 @@ let rec parse_atomic_exp (toks : T.tok_loc list) : exp * T.tok_loc list =
        (e, toks)
      | (_, (t, ln)::_) ->
        parse_error_expect ln t T.Rparen "a parenthesized expression")
+  (* Everything else is an error *)
   | (t, ln) :: _ ->
     parse_error ln ("bad expression, beginning with " ^ T.show_token t)
 
@@ -416,6 +423,7 @@ and parse_args ln (toks : T.tok_loc list) : exp list * T.tok_loc list =
 let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
   match toks with
   | [] -> eof_error "a statement"
+  (* Assignment statement *)
   | (T.Ident x, ln) :: toks ->
     (match parse_indices toks with
      | (_, []) -> eof_error "an assignment statement"
@@ -424,10 +432,12 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
        (Loc (Assign (Source (x, None), indices, e), ln), toks)
      | (_, (t, ln) :: _) ->
        parse_error_expect ln t T.Assign "an assignment statement")
+  (* While statement *)
   | (T.While, ln) :: toks ->
     let (e, toks) = parse_exp toks in
     let (s, toks) = parse_stmt toks in
     (Loc (DoWhile (Stmts [], e, s), ln), toks)
+  (* Do While statement *)
   | (T.Do, ln) :: toks ->
     (match parse_stmt toks with
      | (_, []) -> eof_error "a do statement"
@@ -436,6 +446,7 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
        (Loc (DoWhile (s, e, Stmts []), ln), toks)
      | (_, (t, ln) :: _) ->
        parse_error_expect ln t T.While "a do statement")
+  (* If Else statement *)
   | (T.If, ln) :: toks ->
     (match parse_exp toks with
      | (_, []) -> eof_error "an if statement"
@@ -449,21 +460,29 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
           parse_error_expect ln t T.Else "an if statement")
      | (_, (t, ln) :: _) ->
        parse_error_expect ln t T.Then "an if statement")
+
+  (* TODO Parsing of Switch *)
+  | (T.Switch, ln) :: toks ->
+    let (e, toks) = parse_exp toks in 
+    let (s, toks) = parse_stmt toks in 
+    (Loc (Switch (e, s), ln), toks)
+  (* TODO Parsing of Case *)
+  | (T.Case, ln) :: toks ->
+    let (e, toks) = parse_exp toks in 
+    let (s, toks) = parse_stmt toks in 
+    (Loc (Case (e, s), ln), toks)
+  (* TODO Parsing of Default *)
+  | (T.Default, ln) :: toks ->
+    let (s, toks) = parse_stmt toks in 
+    (Loc (Default (s), ln), toks)
+
   | (T.Lcurly, ln) :: toks ->
     let (s_list, toks) = parse_stmt_list toks in
     (Loc (Stmts (s_list), ln), toks)
   | (T.Input, ln) :: (T.Ident x, _) :: toks -> (Loc (In (Source (x,None)), ln), toks)
   | (T.Output, ln) :: (T.Ident x, _) :: toks -> (Loc (Out (Source (x,None)), ln), toks)
   | (T.Return, ln) :: (T.Ident x, _) :: toks -> (Loc (Return (Some (Source (x,None))), ln), toks)
-  (* TODO Parsing of Switch *)
-  | (T.Switch, ln) :: toks ->
-    (match parse_stmt toks with 
-      | (_, []) -> eof_error "a switch statement"
-      | (s, (T.Case, _)::toks) ->
-        let (e, toks) = parse_exp toks in
-          (Loc (Switch (e, Stmts [], s), ln), toks)
-      | (_, (t, ln) :: _) ->
-        parse_error_expect ln t T.Case "a case statement")
+
   | (t, ln) :: _ ->
     parse_error ln ("bad statement, beginning with a " ^ T.show_token t)
 

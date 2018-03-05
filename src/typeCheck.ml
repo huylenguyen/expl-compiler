@@ -217,12 +217,18 @@ let rec type_stmt (ln : int option) (env :env_t) (return : t) (stmt : stmt)
   | Loc (s, ln') ->
       type_stmt (Some ln') env return s
   (* TODO type check switch def case*)
-  | Switch (e, stmt_list, def_stmt) -> 
+  | Switch (e, stmt_list) -> 
+    let stmt_list' = (type_stmt ln env return) stmt_list  in
+      (match type_exp ln env e with 
+       | (Tarray _, _) -> type_error ln "switch statement with expression of type array"
+       | (_, e') -> Switch (e', stmt_list'))
+
+(*   | Switch (e, stmt_list, def_stmt) -> 
     let stmt_list' = (type_stmt ln env return) stmt_list  in
       let def_stmt' = type_stmt ln env return def_stmt in 
         (match type_exp ln env e with 
         | (Tarray _, _) -> type_error ln "switch statement with expression of type array"
-        | (_, e') -> Switch (e', stmt_list', def_stmt'))
+        | (_, e') -> Switch (e', stmt_list', def_stmt')) *)
   | Case (e, stmt) ->
     (match type_exp ln env e with 
     | (Tarray _, _) -> type_error ln "case statement with expression of type array"
@@ -306,8 +312,8 @@ let rec check_return_paths (stmts : stmt list) : bool =
         check_return_paths [s1]
       | Stmts s -> check_return_paths s
     (* TODO this should also check return paths of stmt_list *)
-      | Switch (_, _, def_stmt) ->
-        check_return_paths [def_stmt]
+      | Switch (_, stmt) ->
+        check_return_paths [stmt]
       | Case (_, stmt) ->
         check_return_paths [stmt]
       | Default (stmt) ->

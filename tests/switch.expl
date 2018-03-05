@@ -1,16 +1,25 @@
-// Input a number and get the switch statement return
+// Input a number between 1 and 3 and get the input * 2. Default returns 0
 
 let v : int = exec(0)
 
 function exec (x : int) : int{
     let x : int = 0
+  	let a : int = 1
+  	let b : int = 2
+  	let c : int = 0
+
     input x
     
-    switch a {
-        case 1 : output 2
-        case 2 : output 3
-        case 3 : output 4
-        default : output 5
+    switch x {
+        case 1 {
+        	output a
+        }
+        case 2 {
+        	output b
+        }
+        default {
+        	output c
+        }
     }
     return x
 }
