@@ -1,3 +1,31 @@
+# CO658 Assessment 2 - Front-End Mini-Problem
+## H. Le Nguyen, D. Bard
+
+### Files Changed
+#### Switch Statement - Medium
+
+- tests/switch.expl (testing file)
+- tests/Makefile (to allow for testing file)
+- src/astInterp.ml
+    - L268-281 Adds the interpreter functions for the switch, case and default statements
+- src/sourceAst.ml
+    - L184-186 Adds the type definition for each section of the switch statement
+    - L235-246 Adds in pretty printing the switch statements for post processing
+    - L466-485 Parses the switch statement to convert it into an AST. This uses the type definition above to corretly pattern match or returns an error.
+- src/sourceAst.mli
+    - L58-60 Adds statement definitions to the signature file for the AST creation file.
+- src/tokens.ml
+    - L102-104 Adds the Switch, Case and Default statement tokens
+    - L137-139 Adds the plaintext conversion for the Switch, Case and Default statements
+    - L161 Adds Switch, Case and Default to the keyword map
+- src/tokens.mli
+    - L68-70 Adds Switch, Case and Default to the signature file for the tokens
+- src/typeCheck.ml
+    - L220-233 Typechecks the switch statement using the statement definitions from sourceAst
+    - L310-316 Adds in the return paths for the switch statements
+
+---
+
 A simple compiler for a simple imperative language targeting x86-64 assembly
 (for systems that follow the System V ABI, so most operating systems **except**
 Windows).
