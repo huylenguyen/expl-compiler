@@ -468,11 +468,12 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
     let (s, toks) = parse_stmt toks in 
     (Loc (Switch (e, s), ln), toks)
   (* TODO Parsing of Case *)
-  | (T.Case, ln) :: toks ->
+  | (T.Case, _) :: toks ->
     let (e, toks) = parse_exp toks in 
     let (s, toks) = parse_stmt toks in 
     (match toks with 
       | [] -> eof_error "a case statement"
+      (* Enforce that a Case statement must be followed by another Case or Default *)
       | (T.Case, ln) :: _ ->  
         (Loc (Case (e, s), ln), toks)
       | (T.Default, ln) :: _ -> 
@@ -480,9 +481,15 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
       | (t, ln) :: _ ->
           parse_error_expect ln t T.Default "a case statement")
   (* TODO Parsing of Default *)
-  | (T.Default, ln) :: toks ->
+  | (T.Default, _) :: toks ->
     let (stmt, toks) = parse_stmt toks in 
-    (Loc (Default (stmt), ln), toks)
+    (match toks with
+      (* Enforce that there may only be one default statement *)
+      | [] -> eof_error "a default statement"
+      | (T.Rcurly, ln) :: _ -> 
+        (Loc (Default (stmt), ln), toks)
+      | (t, ln) :: _ ->
+          parse_error_expect ln t T.Rcurly "a default statement")
 
   | (T.Lcurly, ln) :: toks ->
     let (s_list, toks) = parse_stmt_list toks in

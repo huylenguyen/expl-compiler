@@ -277,7 +277,11 @@ and interp_stmt (env : env_t) (s : stmt) : unit =
           let ex' = interp_exp env ex in
           let r = Stmts (rest) in 
           if e = ex' then interp_stmt env st else interp_stmt env (Switch (exp, r)) (* () *)
-        | Default (stmt) -> interp_stmt env stmt)
+          (* If we see a default statement, finish the switch statement. if there is anything else raise error *)
+        | Default (stmt) -> 
+          (match rest with
+            | [] -> interp_stmt env stmt
+            | _ -> raise (Crash "found two or more default statements")))
       | _ -> ())
 
 let interp_prog (p : prog) : unit =
