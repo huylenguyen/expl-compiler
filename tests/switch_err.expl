@@ -1,0 +1,122 @@
+// Demonstrating type checking errors for the switch statements
+// Uncommenting any of the functions should provide an error. Uncommenting multiple functions won't compile due to multiple function names.
+
+let v : int = exec(0)
+
+// Error due to multiple default statements
+
+//function exec (x:int) : int{
+//    let x : int = 0
+//    let a : int = 1
+//    let b : int = 2
+//    let c : int = 3
+//    let z : int = 0
+//    input x
+//    switch x {
+//        case 1 {
+//        	z := a * 2
+//        	output z
+//        }
+//        case 2 {
+//        	z := b * 2
+//        	output z
+//        }
+//        case 3 {
+//        	z := c * 2
+//        	output z
+//        }
+//        default {
+//            z := x * 2
+//        	output z
+//   	}
+//        default {
+//            z := x * 3
+//            output z
+//        }
+//    }
+//    return x
+//}
+
+// Returns error due to array in the expression
+
+//function exec (x:int) : int{
+//    let x : int = 0
+//    let a : array 2 = array[4][4]
+//    let b : int = 2
+//    let c : int = 3
+//    let z : int = 0
+//    input x
+//    switch x {
+//        case 1 {
+//        	z := a * 2
+//        	output z
+//        }
+//        case 2 {
+//        	z := b * 2
+//        	output z
+//        }
+//        case 3 {
+//        	z := c * 2
+//        	output z
+//        }
+//        default {
+//            z := x * 2
+//        	output z
+//   	}
+//    }
+//    return x
+//}
+
+// Missing default statement
+
+//function exec (x:int) : int{
+//    let x : int = 0
+//   //
+
+function exec (x:int) : int{
+    let x : int = 0
+    let a : int = 1
+    let b : int = 2
+    let c : int = 3
+    let z : int = 0
+    input x
+    switch x {
+        case 1 {
+        	z := a * 2
+        	output z
+        }
+        case 2 {
+        	z := b * 2
+        	output z
+        }
+        case 3 {
+        	z := c * 2
+        	output z
+        }
+        default {
+            z := x * 2
+        	output z
+   	}
+    }
+    return x
+} let a : int = 1
+//    let b : int = 2
+//    let c : int = 3
+//    let z : int = 0
+//    input x
+//    switch x {
+//        case 1 {
+//        	z := a * 2
+//        	output z
+//        }
+//        case 2 {
+//        	z := b * 2
+//        	output z
+//        }
+//        case 3 {
+//        	z := c * 2
+//        	output z
+//        }
+//    }
+//    return x
+//}
