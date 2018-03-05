@@ -180,7 +180,7 @@ type stmt =
   | Out of id
   | Return of id option
   | Loc of stmt * int (* annotate a statement with it's source line number *)
-  (* TODO *)
+  (* Type declaration for Switch, Case, Default *)
   | Switch of exp * stmt
   | Case of exp * stmt
   | Default of stmt
@@ -231,7 +231,7 @@ let rec pp_stmt (fmt : F.formatter) (stmt : stmt) : unit =
       pp_id i
   | Loc (s, _) ->
     pp_stmt fmt s
-  (* TODO pretty print switch *)
+  (* Pretty printing for Case, Default, and Switch *)
   | Case (exp, stmt) ->
     F.fprintf fmt "@[<2>case@ %a@ :@ %a@]"
     pp_exp exp
@@ -239,7 +239,6 @@ let rec pp_stmt (fmt : F.formatter) (stmt : stmt) : unit =
   | Default (stmt) ->
     F.fprintf fmt "@[<2>default :@ %a@]"
     pp_stmt stmt
-  (* TODO *)
   | Switch (exp, stmts) ->
     F.fprintf fmt "@[<2>switch@ %a@ :@ %a@]"
     pp_exp exp
@@ -461,13 +460,12 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
           parse_error_expect ln t T.Else "an if statement")
      | (_, (t, ln) :: _) ->
        parse_error_expect ln t T.Then "an if statement")
-
-  (* TODO Parsing of Switch *)
+  (* Switch statement parsing *)
   | (T.Switch, ln) :: toks ->
     let (e, toks) = parse_exp toks in 
     let (s, toks) = parse_stmt toks in 
     (Loc (Switch (e, s), ln), toks)
-  (* TODO Parsing of Case *)
+  (* Case statement parsing *)
   | (T.Case, _) :: toks ->
     let (e, toks) = parse_exp toks in 
     let (s, toks) = parse_stmt toks in 
@@ -480,11 +478,11 @@ let rec parse_stmt (toks : T.tok_loc list) : stmt * T.tok_loc list =
         (Loc (Case (e, s), ln), toks)
       | (t, ln) :: _ ->
           parse_error_expect ln t T.Default "a case statement")
-  (* TODO Parsing of Default *)
+  (* Default statement parsing *)
   | (T.Default, _) :: toks ->
     let (stmt, toks) = parse_stmt toks in 
     (match toks with
-      (* Enforce that there may only be one default statement *)
+      (* Enforce that there may only be one default statement and it has to be before a } *)
       | [] -> eof_error "a default statement"
       | (T.Rcurly, ln) :: _ -> 
         (Loc (Default (stmt), ln), toks)

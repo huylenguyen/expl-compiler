@@ -4,26 +4,26 @@
 ### Files Changed
 #### Switch Statement - Medium
 
-- tests/switch.expl (testing file)
-- tests/Makefile (to allow for testing file)
-- tests/switch_err.expl (Shows the various errors which have been implemented for the switch statement)
-- src/astInterp.ml
-    - L268-281 Adds the interpreter functions for the switch, case and default statements
-- src/sourceAst.ml
-    - L184-186 Adds the type definition for each section of the switch statement
-    - L235-246 Adds in pretty printing the switch statements for post processing
-    - L466-485 Parses the switch statement to convert it into an AST. This uses the type definition above to corretly pattern match or returns an error.
-- src/sourceAst.mli
-    - L58-60 Adds statement definitions to the signature file for the AST creation file.
+- tests/switch.expl (test code demonstrating the correct switch statement syntax)
+- tests/Makefile (Allowed test code in compilation)
+- tests/switch_err.expl (Test code demonstrating the various errors which have been implemented for the switch statement)
 - src/tokens.ml
     - L102-104 Adds the Switch, Case and Default statement tokens
     - L137-139 Adds the plaintext conversion for the Switch, Case and Default statements
     - L161 Adds Switch, Case and Default to the keyword map
 - src/tokens.mli
     - L68-70 Adds Switch, Case and Default to the signature file for the tokens
+- src/sourceAst.ml
+    - L184-186 Adds the type definition for the Switch, Case and Default statements
+    - L235-245 Adds pretty printing for Switch, Case and Default statements for post processing
+    - L463-490 Parses Switch, Case, and Default statements into ASTs.
+- src/sourceAst.mli
+    - L58-60 Adds statement definitions to the signature file for the AST creation file.
 - src/typeCheck.ml
-    - L220-233 Typechecks the switch statement using the statement definitions from sourceAst
-    - L310-316 Adds in the return paths for the switch statements
+    - L220-233 Typechecks the Switch, Case, and Default statements
+    - L309-314 Adds in the return paths checking for the Switch, Case, and Default statements
+- src/astInterp.ml
+    - L268-281 Adds the interpreter functionality for the switch, case and default statements, with error checking
 
 ---
 
@@ -124,6 +124,9 @@ stmt ::=
 | `do` stmt `while` exp  
 | `if` exp `then` stmt `else` stmt  
 | `{` stmts `}`  
+| `switch` exp `{` stmts `}`
+| `case` exp `{` stmts `}`
+| `default` `{` stmts `}`
 | `input` identifier  
 | `output` identifier  
 | `return` identifier

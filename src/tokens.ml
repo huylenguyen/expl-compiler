@@ -98,7 +98,7 @@ type token =
   | Let
   | Function
   | Return
-  (* TODO *)
+  (* Switch, Case, Default tokens *)
   | Switch
   | Case
   | Default
@@ -133,7 +133,7 @@ let show_token (t : token) : string =
   | Let -> "let"
   | Function -> "function"
   | Return -> "return"
-  (* TODO *)
+  (* Show Switch, Case, Default tokens *)
   | Switch -> "switch"
   | Case -> "case"
   | Default -> "default"
@@ -159,7 +159,6 @@ let keywords : (string * token) list =
     [Do; While; If; Then; Else; Array; Assign; True; Input; Output; False;
      Lparen; Rparen; Lcurly; Rcurly; Lbrac; Rbrac; Int; Bool; Colon; Let;
      Return; Function; Comma; Switch; Case; Default]
-    (* TODO *)
 
 (* Map each keyword string to its corresponding token *)
 let keyword_map : token Strmap.t =
